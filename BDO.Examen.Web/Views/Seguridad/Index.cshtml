@@ -1,0 +1,133 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en" id="login" class="inicial">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AdminLTE 3 | Log in (v2)</title>
+
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="@Url.Content("~/assets/plugins/fontawesome-free/css/all.min.css")">
+
+    <!-- icheck bootstrap -->
+    <link rel="stylesheet" href="@Url.Content("~/assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css")">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="@Url.Content("~/assets/dist/css/adminlte.min.css")">
+
+    <style>
+        .colorrojo {
+            color: red;
+        }
+    </style>
+</head>
+<body class="hold-transition login-page">
+    <div class="login-box">
+        <!-- /.login-logo -->
+        <div class="card card-outline card-primary">
+            <div class="card-header text-center">
+                <a href="#" class="h1"><b>Admin</b>LTE</a>
+            </div>
+            <div class="card-body">
+                <p class="login-box-msg">Examen BDO</p>
+
+                <form id="formulario-login" autocomplete="nope">
+                    <div class="input-group mb-3">
+                        <input type="email" id="login-correo" class="form-control" placeholder="Correo" value="admin@peru.com">
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-envelope"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group mb-3">
+                        <input type="password" id="login-contrasena" class="form-control" placeholder="Contraseña" value="admin">
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="icheck-primary">
+
+                            </div>
+                        </div>
+                        <!-- /.col -->
+                        <div class="col-6">
+                            <button type="button" id="btn-entrar" onclick="return iniciosession();" class="btn btn-primary btn-block">Ingresar</button>
+                        </div>
+
+                        <div style="display:none" id="dvError" class="form-control">
+                            <span id="mensage_error" class="colorrojo"></span>
+                        </div>
+                        <!-- /.col -->
+                    </div>
+                </form>
+
+                <!-- /.social-auth-links -->
+
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </div>
+    <!-- /.login-box -->
+    <!-- jQuery -->
+    <script src="@Url.Content("~/assets/plugins/jquery/jquery.min.js")"></script>
+    <!-- Bootstrap 4 -->
+    <script src="@Url.Content("~/assets/plugins/bootstrap/js/bootstrap.bundle.min.js")"></script>
+    <!-- AdminLTE App -->
+    <script src="@Url.Content("~/assets/dist/js/adminlte.min.js")"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/jquery.validate.min.js?@DateTime.Now.ToString("yyyyMMddHHmmss")"></script>
+    <script src="@Url.Content("~/assets/js/validacion.js?" + @DateTime.Now.ToString("yyyyMMddHHmmss"))"></script>
+    <script src="@Url.Content("~/commonjs/axios/dist/axios.min.js")"></script>
+
+    <script type="text/javascript">
+
+        var jsForm = {
+            table: null,
+            url: '@ViewBag.sw_login',
+            url_mvc: "@Url.Action("authe", "seguridad")",
+            _correo: $("#login-correo").val(),
+            _passwd: $("#login-contrasena").val(),
+            ArrUpload: [],
+            clearFormFields: function () {
+            },
+            init: function () {
+                jsForm.CargarCombos();
+                jsForm.Vadidate();
+                jsForm.DataList();
+                jsForm.EventsComunes();
+                jsForm.EventsTrans();
+            },
+            Vadidate: function () {
+            },
+            CargarCombos: function () {
+
+            },
+            EventsComunes: function () {
+
+            },
+            EventsTrans: function () {
+            },
+            CargarGrilla: function () {
+            },
+            DataList: function () {
+            }
+        };
+
+        $(document).ready(function () {
+            jsForm.init();
+        });
+    </script>
+    <script src="@Url.Content("~/assets/js/login.js?" + @DateTime.Now.ToString("yyyyMMddHHmmss"))"></script>
+</body>
+</html >

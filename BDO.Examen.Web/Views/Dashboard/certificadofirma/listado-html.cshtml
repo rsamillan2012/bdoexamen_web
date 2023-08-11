@@ -1,0 +1,161 @@
+﻿@{
+
+
+}
+
+<div class="row">
+    <div id="v-app-listado" class="col-md-12">
+        <div v-show="mostrarlistado" class="card">
+            <div class="card-header">
+                <h3 class="card-title"></h3>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+                <div class="d-flex">
+                    <div class="col-2">
+                        <button type="button" v-on:click="nuevo()" class="btn btn-block btn-primary btn-sm">Agregar Nuevo</button>
+                    </div>
+                    
+                    <div class="ml-auto">
+                        <input type="text" name="name" v-model="criterio" v-on:keyup.enter="listarClientes(1)" placeholder="buscar..." value="" />
+                    </div>
+                    <div class="col-1">
+                        <button type="button" v-on:click="exportar()" class="btn btn-block btn-warning btn-sm">Exportar</button>
+                        
+                    </div>
+                </div>
+            </div>
+                <div class="card-body">
+
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th style="width: 10px">id</th>
+                                <th>Razón Social / Persona </th>
+                                <th>Tipo Firma</th>
+                                <th>Representante Legal</th>
+                                <th>Fecha Emision</th>
+                                <th>Empresa Acredit</th>
+                                <th>Fecha Vencimiento</th>
+                                <th>Rubica Escaneada</th>
+                                <th style="width: 40px">Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="firma in arrayfirmas" :key="firma.idFirma">
+                                <td v-text="firma.idFirma"></td>
+                                <td v-text="firma.razonSocial"></td>
+                                <td v-text="firma.tipoFirma"></td>
+                                <td v-text="firma.representanteLegal"></td>
+                                <td v-text="firma.fechaEmision"></td>
+                                <td v-text="firma.empresaAcreditadora"></td>
+                                <td v-text="firma.fechaVencimiento"></td>
+                                <td v-text="firma.ruta_rubrica"></td>
+                                <td>
+                                    <button type="button" v-on:click="editar(firma.idFirma)" class="btn btn-primary">Editar</button>&nbsp;
+                                    <button type="button" v-on:click="eliminar(firma.idFirma)" class="btn btn-danger">Eliminar</button>
+
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer clearfix">
+
+                    <ul class="pagination pagination-sm m-0 float-right">
+                        <li class="page-item"><a class="page-link" v-on:click.prevent="listarClientes(1)" href="#">&laquo;</a></li>
+
+                        <!--
+                    <li class="page-item"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                 -->
+                        <li class="page-item" v-for="page in pagesNumber" :key="page">
+                            <a class="page-link" v-on:click.prevent="cambiarPagina(page)" href="#" v-text="page"></a>
+                        </li>
+
+                        <li class="page-item"><a class="page-link" v-on:click.prevent="listarClientes(pagination.last_page)" href="#">&raquo;</a></li>
+                    </ul>
+                </div>
+            </div>
+            <!-- /.card -->
+
+
+        <div v-show="mostraregistro" class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">Nueva Firma / Editar Firma</h3>
+            </div>
+            
+            <form ref="form" action="enviar-informacion" id="formulario-documento" method="post" enctype="multipart/form-data">
+                <div class="card-body">
+                    <div class="form-group col-4">
+                        <label for="exampleInputEmail1">Tipo Forma</label>
+                        <select name="tipo_firma" v-bind:class="ftipoforma ? 'form-control select2 input-validate' : 'form-control select2'" style="width: 100%;">
+                            <option value="0" selected="selected">seleccione</option>
+                            <option value="1">Firma Digital</option>
+                            <option value="2">Rubrica Escaneada</option>
+                            <option value="3">Firma Electronica</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-5">
+                        <label for="">Razon Social / Persona:</label>
+                        <input type="text" name="razon_social" v-bind:class="frazonsocial ? 'form-control input-validate' : 'form-control'" placeholder="Razon Social / Persona...">
+                    </div>
+                    <div class="form-group col-5">
+                        <label for="">Representante legal:</label>
+                        <input type="text" name="representante_legal" v-bind:class="frepresentante ? 'form-control input-validate' : 'form-control'" placeholder="Representante legal...">
+                    </div>
+                    <div class="form-group col-5">
+                        <label for="">Empresa Acreditadora:</label>
+                        <input type="text" class="form-control" v-bind:class="fempresaacredit ? 'form-control input-validate' : 'form-control'" name="empresa_acreditadora" placeholder="Empresa Acreditadora...">
+                    </div>
+
+                    <div class="form-group col-5">
+                        <label for="">Fecha Emision:</label>
+                        <input type="date" v-bind:class="ffechaemision ? 'form-control input-validate' : 'form-control'" name="fecha_emision" placeholder="Fecha Emision...">
+                    </div>
+
+                    <div class="form-group col-5">
+                        <label for="">Fecha Vencimiento:</label>
+                        <input type="date" v-bind:class="ffechavencimiento ? 'form-control input-validate' : 'form-control'" name="fecha_vencimiento" placeholder="Fecha Vencimiento...">
+                    </div>
+
+                    <div class="form-group col-8">
+                        <label for="exampleInputFile">Rubri Escaneada</label>
+                        <div class="input-group">
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" name="rubriescaneada" accept="image/jpeg">
+                                <label class="custom-file-label" for="exampleInputFile">Escojer</label>
+                            </div>
+                        </div>
+                        <span v-show="frubriescaneada" class="text-validate">Formato no valido, solo imagenes (jpg y png)</span>
+                    </div>
+
+                    <div class="form-group col-8">
+                        <label for="exampleInputFile">Rubri Escaneada</label>
+                        <div class="input-group">
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" name="certificadodigital" accept="application/pdf">
+                                <label class="custom-file-label" for="exampleInputFile">Escojer</label>
+                            </div>
+                        </div>
+                        <span v-show="fcertificadodigital" class="text-validate">Formato no valido, solo documentos (pdf)</span>
+                    </div>
+
+                    <input type="hidden" id="cod_firma" name="cod_firma" value="" />
+
+                </div>
+                    <!-- /.card-body -->
+
+                    <div class="card-footer">
+                        <button type="button" v-on:click="click_enviar()" :disabled="desactivar" class="btn btn-primary">{{ nombreboton }}</button>
+                        &nbsp;
+                        <button v-on:click="volver()" type="button" class="btn btn-danger">Volver</button>
+                    </div>
+                </form>
+
+</div>
+     </div>
+
+</div>

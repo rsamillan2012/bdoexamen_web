@@ -1,0 +1,373 @@
+﻿@{
+    Layout = "~/Views/Shared/_baselayout.cshtml";
+
+
+    int _canti = int.Parse(ViewBag.CantAcord);
+
+}
+
+@section JSLocal{
+    <script language="javascript" type="text/javascript">
+
+
+        var app = new Vue({
+            el: '#v-app-listado',
+            data: {
+                arrayfirmas: [],
+                mostrarlistado: true,
+                mostraregistro: false,
+                mostrar_apellido_doc: false,
+                desactivar: false,
+                starvalid: false,
+                idFirma: 0,
+                frazonsocial: false,
+                frepresentante: false,
+                fempresaacredit: false,
+                ffechaemision: false,
+                ffechavencimiento: false,
+                ftipoforma: false,
+                frubriescaneada: false,
+                fcertificadodigital: false,
+                nombreboton : 'Guardar',
+                nombreapellidos_personarecepcion: '',
+                tipo_firma: '0',
+                razon_social: '',
+                representante_legal: '',
+                empresa_acreditadora: '',
+                fecha_emision: '',
+                fecha_vencimiento: '',
+                pagination:
+                {
+                    'total': 0,
+                    'current_page': 0,
+                    'per_page': 0,
+                    'last_page': 0,
+                    'from': 0,
+                    'to': 0
+                },
+                offset: 3,
+                arrayClientes: [],
+                criterio: ''
+            },
+            computed: {
+                isActived: function () {
+                    return this.pagination.current_page;
+                },
+                frazonsocial: function () {
+                    var res = false;
+                    if (this.starvalid) res = (this.$refs.form.razon_social.value == '');
+                    return res;
+                },
+                frepresentante: function () {
+                    var res = false;
+                    if (this.starvalid) res = (this.$refs.form.representante_legal.value == '');
+                    return res;
+                },
+                fempresaacredit: function () {
+                    var res = false;
+                    if (this.starvalid) res = (this.$refs.form.empresa_acreditadora.value == '');
+                    return res;
+                },
+                pagesNumber: function () {
+
+                    if (!this.pagination.to) {
+                        return [];
+                    }
+
+                    var from = this.pagination.current_page - this.offset;
+                    if (from < 1) {
+                        from = 1;
+                    }
+
+                    var to = from + (this.offset * 2);
+                    if (to >= this.pagination.last_page) {
+                        to = this.pagination.last_page;
+                    }
+                    //
+                    var pagesArray = [];
+                    while (from <= to) {
+                        pagesArray.push(from);
+                        from++;
+                    }
+                    return pagesArray;
+
+                }
+            },
+            methods: {
+                click_enviar() {
+                    let me = this;
+
+                    this.$refs.form.cod_firma.value = me.idFirma;
+
+                    me.starvalid = true;
+                    if (me.validacion()) {
+                        swal({
+                            title: 'Verificacion',
+                            text: "Existen datos requeridos, verifique",
+                            type: 'warning',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            showCancelButton: false,
+                            confirmButtonColor: '#EF6F6C',
+                            confirmButtonText: 'OK'
+                        }).then(function () {
+
+                        });
+                        return;
+                    }
+
+                    this.nombreboton = 'Espere...'
+                    this.desactivar = true;
+                    this.$refs.form.submit();
+                },
+                validacion() {
+                    let me = this;
+                    let result = false;
+                    const _rubriesc1 = '.jpg'
+                    const _rubriesc2 = '.png'
+                    const _certif = 'pdf'
+
+                    me.frazonsocial = (this.$refs.form.razon_social.value == '');
+                    me.frepresentante = (this.$refs.form.representante_legal.value == '');
+                    me.fempresaacredit = (this.$refs.form.empresa_acreditadora.value == '');
+                    me.ffechaemision = (this.$refs.form.fecha_emision.value == '');
+                    me.ffechavencimiento = (this.$refs.form.fecha_vencimiento.value == '');
+                    me.ftipoforma = (this.$refs.form.tipo_firma.value == '0' || this.$refs.form.tipo_firma.value == '');
+
+
+                    me.frubriescaneada = (this.$refs.form.rubriescaneada.value == '');
+
+                    me.fcertificadodigital = (this.$refs.form.certificadodigital.value == '');
+
+                    if (!me.frubriescaneada) {
+                        me.frubriescaneada = this.$refs.form.rubriescaneada.value.includes(_rubriesc1) || this.$refs.form.rubriescaneada.value.includes(_rubriesc2);
+                        if (me.frubriescaneada) me.frubriescaneada = false;
+                    }
+
+                    if (!me.fcertificadodigital) {
+                        me.fcertificadodigital = this.$refs.form.certificadodigital.value.includes(_certif);
+                        if (me.fcertificadodigital) me.fcertificadodigital = false;
+                    }
+
+                    result = (me.frazonsocial || me.frepresentante || me.fempresaacredit);
+
+                    return result;
+                },
+                exportar() {
+                    let me = this;
+
+                    var url = '@Url.Action("reporte-excel", "dashboard")';
+                    window.location.href = url;
+                },
+                editar(id) {
+                    let me = this;
+                    let _respuesta;
+                    var url = '@Url.Action("get-config", "dashboard")';
+
+                    axios.get(url, {}, {}).then(response => {
+                        let dataObj = response.data;
+
+                        let header = { "Authorization": "Bearer " + dataObj.token };
+                        let configuracion = { headers: header };
+
+                        url_pre = '@ViewBag.sw_getentidad';
+                        url = url_pre.replace('{cod_firma}', id);
+
+                        axios.get(url, configuracion).then(function (response) {
+                            var respuesta = response.data;
+
+                            _respuesta = respuesta;
+
+
+                        }).catch(function (error) {
+                            if (error.response.status === 401) {
+                                var url_return = '@Url.Action("LogOut", "Seguridad")';
+                                window.location.href = url_return;
+
+                            }
+                        }).finally(function () {
+                            if (_respuesta != null) {
+                                me.mostrarlistado = false;
+                                me.mostraregistro = true;
+
+                                me.idFirma = _respuesta.idFirma;
+                                me.$refs.form.tipo_firma.value = _respuesta.tipoFirma;
+                                me.$refs.form.razon_social.value = _respuesta.razonSocial;
+                                me.$refs.form.representante_legal.value = _respuesta.representanteLegal;
+                                me.$refs.form.empresa_acreditadora.value = _respuesta.empresaAcreditadora;
+                                me.$refs.form.fecha_emision.value = _respuesta.fechaEmision;
+                                me.$refs.form.fecha_vencimiento.value = _respuesta.fechaVencimiento;
+                            }
+                        });
+                    });
+
+
+                },
+                eliminar(id) {
+                    let me = this;
+
+                    swal({
+                        title: '¿Confirmacion?',
+                        text: "Confirma que desea eliminar el registro seleccionado?",
+                        type: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#EF6F6C',
+                        cancelButtonColor: '#ff9933',
+                        confirmButtonText: 'Si',
+                        cancelButtonText: "No",
+                        closeOnConfirm: false
+                    }).then(function (isConfirm) {
+                        if (isConfirm.value) {
+
+
+                            let url = '@Url.Action("get-config", "dashboard")';
+                            let urldelete = '@ViewBag.sw_eliminar';
+
+                            axios.get(url, {}, {}).then(response => {
+                                let dataObj = response.data;
+
+                                let header = { "Authorization": "Bearer " + dataObj.token };
+                                let configuracion = { headers: header };
+
+                                var _data = {
+                                    'IdFirma': id
+                                }
+
+                                axios.post(urldelete, _data, configuracion).then(function (response) {
+                                    var respuesta = response.data;
+
+                                    console.log('respuesta', respuesta);
+
+                                }).catch(function (error) {
+                                    if (error.response.status === 401) {
+                                        var url_return = '@Url.Action("LogOut", "Seguridad")';
+                                        window.location.href = url_return;
+
+                                    }
+
+                                }).finally(function () {
+                                    for (var i = me.arrayfirmas.length - 1; i >= 0; --i) {
+                                        if (me.arrayfirmas[i].idFirma == parseInt(id)) {
+                                            me.arrayfirmas.splice(i, 1);
+                                        }
+                                    }
+
+                                });
+
+
+
+                            });
+
+                        }
+
+                    }, function (dismiss) {
+                        if (dismiss === 'cancel') {
+                            //alert('ha cancelado');
+                            return false;
+                        }
+                    });
+                },
+                volver() {
+                    let me = this;
+                    me.frazonsocial = false;
+                    me.frepresentante = false;
+                    me.fempresaacredit = false;
+                    me.ffechaemision = false;
+                    me.ffechavencimiento = false;
+                    me.ftipoforma = false;
+                    me.frubriescaneada = false;
+                    me.fcertificadodigital = false;
+
+                    me.mostrarlistado = true;
+                    me.mostraregistro = false;
+                },
+                nuevo() {
+                    let me = this;
+
+                    this.$refs.form.cod_firma.value = '0';
+                    this.$refs.form.razon_social.value = '';
+                    this.$refs.form.representante_legal.value = '';
+                    this.$refs.form.empresa_acreditadora.value = '';
+                    this.$refs.form.fecha_emision.value = '';
+                    this.$refs.form.fecha_vencimiento.value = '';
+                    this.$refs.form.tipo_firma.value = '0';
+                    this.$refs.form.rubriescaneada.value = '';
+                    this.$refs.form.certificadodigital.value = '';
+
+
+                    me.mostrarlistado = false;
+                    me.mostraregistro = true;
+
+                },
+                cambiarPagina(page) {
+                    let me = this;
+                    me.pagination.current_page = page;
+                    me.listarClientes(page);
+                },
+                listarClientes(pagina) {
+
+                    let me = this;
+                    var url_pre = '';
+                    var url = '';
+
+                    var url = '@Url.Action("get-config", "dashboard")';
+
+                    console.log('me.criterio: ', me.criterio);
+
+                    axios.get(url, {}, {}).then(response => {
+                        let dataObj = response.data;
+
+                        let header = { "Authorization": "Bearer " + dataObj.token };
+                        let configuracion = { headers: header };
+
+                        if (me.criterio == '') {
+                            url_pre = '@ViewBag.sw_listado';
+                            url = url_pre.replace('{indicepagina}', pagina);
+
+                        } else {
+                            url_pre = '@ViewBag.sw_listadocriterio';
+                            url = url_pre.replace('{indicepagina}', pagina).replace('{criterio}', me.criterio);
+                        }
+
+                        console.log('url', url);
+
+                        axios.get(url, configuracion).then(function (response) {
+                            var respuesta = response.data;
+
+                            me.arrayfirmas = respuesta.result;
+                            me.pagination = respuesta.pagination;
+
+                            console.log('me.arrayfirmas :', JSON.parse(JSON.stringify(me.arrayfirmas)));
+
+                        }).catch(function (error) {
+                            if (error.response.status === 401) {
+                                var url_return = '@Url.Action("LogOut", "Seguridad")';
+                                window.location.href = url_return;
+
+                            }
+
+                        }).finally(function () {
+
+                        });
+
+                    });
+
+                }
+            },
+
+            created() {
+
+            },
+            mounted() {
+
+                this.listarClientes(1);
+
+            }
+        })
+
+
+
+    </script>
+}
+
+@Html.Partial("~/Views/Dashboard/certificadofirma/listado-html.cshtml", new ViewDataDictionary { { "canti", _canti } })
